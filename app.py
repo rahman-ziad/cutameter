@@ -63,7 +63,7 @@ def upload():
             'timestamp': firestore.SERVER_TIMESTAMP
         })
 
-        return jsonify({'success': True, 'message': 'Image received! Our unicorns are analyzing it now... 🦄Results will arrive in your inbox within an hour. ⏳'})
+        return jsonify({'success': True, 'message': 'Great things take time — your Cutameter results will land in your inbox within 12–24 hours. Our cuteness algorithms are giving it extra sparkle! ✨'})
 
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
