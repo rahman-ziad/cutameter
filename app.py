@@ -7,12 +7,19 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime
 
+import base64
+import json
 app = Flask(__name__)
 load_dotenv()
 
-# Firebase Init
-cred = credentials.Certificate('firebase-service-account.json')
+
+# decode the service account
+firebase_json_str = base64.b64decode(os.getenv("FIREBASE_JSON")).decode("utf-8")
+firebase_cred_dict = json.loads(firebase_json_str)
+
+cred = credentials.Certificate(firebase_cred_dict)
 firebase_admin.initialize_app(cred)
+
 db = firestore.client()
 
 # R2 Init (S3-Compatible)
