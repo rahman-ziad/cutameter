@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cutameter 🦄</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.ico') }}">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .animated-bg {
+        background: linear-gradient(-45deg,
+         #fce7f3,   /* baby pink */
+         #fbcfe8,   /* soft pink */
+         #e0f2fe,   /* sky blue */
+      #d8b4fe,   /* soft lavender */
+         #fecdd3,   /* light coral pink */
+         #fde68a    /* buttery yellow */
+  );
+  background-size: 600% 600%;
+  animation: gradient 18s ease infinite;
+}
+
+    @keyframes twinkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+  50% { transform: scale(1.3) rotate(15deg); opacity: 1; }
+}
+
+.star {
+  width: 16px;
+  height: 16px;
+  background: #facc15; /* pastel yellow */
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  animation: twinkle 1.5s ease-in-out infinite;
+}
+
+  </style>
+</head>
+<body class="animated-bg min-h-screen flex items-center justify-center px-4">
+  <div id="form-container" class="bg-white bg-opacity-90 p-8 rounded-3xl shadow-xl max-w-md w-full transition-all">
+    <h1 class="text-3xl sm:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 mb-4 animate-pulse">Cutameter 🦄</h1>
+    <p class="text-center text-gray-800 mb-6 text-base sm:text-lg font-medium">
+       Upload a photo to get your official Cutameter rating. 📸</br>
+        No sign-ups, no worries — just pure fun. 🎉
+
+    </p>
+    <form id="upload-form" enctype="multipart/form-data" class="space-y-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Your Photo</label>
+        <div id="drop-area" class="border-2 border-dashed border-pink-300 rounded-2xl p-8 sm:p-10 text-center hover:bg-pink-50 transition duration-300 cursor-pointer min-h-[250px] flex flex-col items-center justify-center space-y-4">
+          <input type="file" name="image" accept="image/*" id="file-input" class="hidden"/>
+          <div id="image-preview" class="hidden w-40 h-40 sm:w-56 sm:h-56 bg-cover bg-center rounded-xl border border-pink-200 shadow-lg"></div>
+          <p id="drop-text" class="text-gray-500 text-sm mt-2">Drag & drop or <span class="text-pink-400 font-semibold underline">click to browse</span></p>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Email Address</label>
+        <input type="email" name="email" placeholder="you@example.com" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-full shadow-sm focus:ring-pink-300 focus:border-pink-300 sm:text-sm bg-gradient-to-r from-pink-50 to-purple-50"/>
+        <p class="mt-1 text-xs text-gray-500">We'll email your results securely! 💌</p>
+      </div>
+      <button type="submit" id="submit-btn" class="w-full py-3 px-4 border border-transparent rounded-full shadow-lg text-sm font-bold text-white bg-gradient-to-r from-pink-400 to-purple-400 hover:scale-105 transition duration-300">
+        Submit
+      </button>
+    </form>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+  <div class="flex flex-col items-center bg-white p-6 rounded-2xl shadow-lg w-80">
+    <dotlottie-player
+      src="https://lottie.host/ed33f186-1113-4e93-9878-942c20d4b57c/7aBSEMeC2i.lottie"
+      background="transparent"
+      speed="1"
+      style="width: 150px; height: 150px"
+      loop
+      autoplay
+    ></dotlottie-player>
+    <p class="text-base text-pink-500 font-semibold mt-4 text-center">
+      Sprinkling sparkles on your cuteness... ✨🧁
+    </p>
+  </div>
+</div>
+
+
+
+  <script>
+    const form = document.getElementById('upload-form');
+    const fileInput = document.getElementById('file-input');
+    const dropArea = document.getElementById('drop-area');
+    const imagePreview = document.getElementById('image-preview');
+    const dropText = document.getElementById('drop-text');
+    const loadingOverlay = document.getElementById('loading-overlay');
+    const container = document.getElementById('form-container');
+
+    // Drag drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
+      dropArea.addEventListener(event, e => e.preventDefault());
+    });
+    dropArea.addEventListener('dragenter', () => dropArea.classList.add('bg-pink-50'));
+    dropArea.addEventListener('dragleave', () => dropArea.classList.remove('bg-pink-50'));
+    dropArea.addEventListener('drop', e => {
+      dropArea.classList.remove('bg-pink-50');
+      fileInput.files = e.dataTransfer.files;
+      showImagePreview(e.dataTransfer.files[0]);
+    });
+    dropArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) showImagePreview(fileInput.files[0]);
+    });
+
+    function showImagePreview(file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        imagePreview.style.backgroundImage = `url(${e.target.result})`;
+        imagePreview.classList.remove('hidden');
+        dropText.classList.add('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      loadingOverlay.classList.remove('hidden');
+
+      try {
+        const res = await fetch('/', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          container.innerHTML = `
+            <h1 class="text-3xl sm:text-4xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 mb-4 animate-pulse">Cutameter 🦄</h1>
+            <p class="text-center text-gray-800 mb-6 text-base sm:text-lg font-medium">${data.message}</p>
+            <button onclick="window.location.reload()" class="w-full py-3 px-4 border border-transparent rounded-full shadow-lg text-sm font-bold text-white bg-gradient-to-r from-indigo-400 to-blue-400 hover:scale-105 transition duration-300">
+              Submit Another Photo
+            </button>
+          `;
+        } else {
+          alert(data.message || 'Something went wrong!');
+        }
+      } catch (err) {
+        alert('Failed to upload. Please try again.');
+      } finally {
+        loadingOverlay.classList.add('hidden');
+      }
+    });
+  </script>
+  <script
+  src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs"
+  type="module"
+></script>
+
+</body>
+</html>
